@@ -1,0 +1,1262 @@
+\documentclass[11pt,a4paper]{article}
+
+% ============================================================
+% PACKAGES
+% ============================================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{parskip}
+
+% ============================================================
+% COLORS
+% ============================================================
+\definecolor{codebackground}{RGB}{248, 248, 248}
+\definecolor{codeborder}{RGB}{220, 220, 220}
+\definecolor{keywordcolor}{RGB}{0, 0, 180}
+\definecolor{stringcolor}{RGB}{163, 21, 21}
+\definecolor{commentcolor}{RGB}{0, 128, 0}
+\definecolor{securegreen}{RGB}{34, 139, 34}
+\definecolor{warningorange}{RGB}{255, 140, 0}
+\definecolor{dangerred}{RGB}{220, 20, 60}
+\definecolor{sectionblue}{RGB}{0, 51, 102}
+\definecolor{linkblue}{RGB}{0, 102, 204}
+
+% ============================================================
+% HYPERREF SETUP
+% ============================================================
+\hypersetup{
+    colorlinks=true,
+    linkcolor=linkblue,
+    urlcolor=linkblue,
+    pdftitle={Security Analysis Report},
+    pdfauthor={},
+}
+
+% ============================================================
+% LISTINGS SETUP
+% ============================================================
+\lstdefinestyle{pythonstyle}{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{keywordcolor}\bfseries,
+    stringstyle=\color{stringcolor},
+    commentstyle=\color{commentcolor}\itshape,
+    backgroundcolor=\color{codebackground},
+    frame=single,
+    rulecolor=\color{codeborder},
+    breaklines=true,
+    breakatwhitespace=true,
+    showstringspaces=false,
+    tabsize=4,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    numbersep=8pt,
+    xleftmargin=15pt,
+    framexleftmargin=15pt,
+}
+\lstset{style=pythonstyle}
+
+% ============================================================
+% SECTION FORMATTING
+% ============================================================
+\titleformat{\section}
+    {\Large\bfseries\color{sectionblue}}
+    {\thesection}{1em}{}[\titlerule]
+    
+\titleformat{\subsection}
+    {\large\bfseries\color{sectionblue!80}}
+    {\thesubsection}{1em}{}
+
+\titleformat{\subsubsection}
+    {\normalsize\bfseries\color{sectionblue!60}}
+    {\thesubsubsection}{1em}{}
+
+% ============================================================
+% CLASSIFICATION COMMANDS
+% ============================================================
+\newcommand{\secure}{\textcolor{securegreen}{\checkmark~\textbf{Secure}}}
+\newcommand{\partiallysecure}{\textcolor{warningorange}{$\triangle$~\textbf{Partially Secure}}}
+\newcommand{\insecure}{\textcolor{dangerred}{$\times$~\textbf{Insecure!}}}
+\newcommand{\missing}{\textcolor{dangerred}{$\times$~\textbf{Missing}}}
+
+% ============================================================
+% HEADER/FOOTER
+% ============================================================
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\textit{Security Analysis Report}}
+\fancyhead[R]{\textit{Authentication Library}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% ============================================================
+% DOCUMENT
+% ============================================================
+\begin{document}
+
+% Title Page
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    
+    {\Huge\bfseries\color{sectionblue} Security Analysis Report\par}
+    \vspace{0.5cm}
+    {\Large\color{gray} AI Generated Authentication Library Implementation\par}
+    \vspace{0.3cm}
+    {\large\color{gray}\textit{For Cryptocurrency Wallet Applications}\par}
+    
+    \vspace{1.5cm}
+    
+    \fbox{%
+        \parbox{0.7\textwidth}{%
+            \centering
+            \large
+            \textbf{Classification Legend}\\[10pt]
+            \begin{tabular}{cl}
+                \textcolor{securegreen}{\checkmark} & Secure \\
+                \textcolor{warningorange}{$\triangle$} & Partially Secure \\
+                \textcolor{dangerred}{$\times$} & Insecure / Missing \\
+            \end{tabular}
+        }%
+    }
+    
+    \vspace{1.5cm}
+    
+    {\large\textbf{Authors:}\par}
+    \vspace{0.3cm}
+    {\normalsize
+        Aya Darawshi (323964676)\\[5pt]
+        Ibrahim Abomokh (315270678)\par
+    }
+    
+    \vspace{1cm}
+    
+    {\normalsize\textit{AI tool used: Gemini 3 Flash Agent}\par}
+    
+    \vfill
+    
+    {\large Securing Digital Products and Services\par}
+    \vspace{0.5cm}
+    {\large Homework 1\par}
+    
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+% ============================================================
+% SUMMARY TABLE (at the top)
+% ============================================================
+\phantomsection
+\section*{Summary}
+\addcontentsline{toc}{section}{Summary}
+
+\begin{table}[h!]
+\centering
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|c|l|c|}
+\hline
+\textbf{\#} & \textbf{Requirement} & \textbf{Classification} \\
+\hline
+1 & Password hashing algorithm & \partiallysecure \\
+\hline
+2 & Password policy enforcement & \secure \\
+\hline
+3 & Brute-force protection & \secure \\
+\hline
+4 & MFA implementation & \partiallysecure \\
+\hline
+5 & Password reset token generation & \partiallysecure \\
+\hline
+6 & Password reset validation & \secure \\
+\hline
+7 & Session generation method & \partiallysecure \\
+\hline
+8 & Token entropy & \secure \\
+\hline
+9 & Token expiration & \secure \\
+\hline
+10 & Session invalidation (logout) & \secure \\
+\hline
+11 & Session invalidation (password change) & \partiallysecure \\
+\hline
+12 & Cookie configuration & \secure \\
+\hline
+13 & Session fixation protection & \secure \\
+\hline
+14 & Privilege separation & \missing \\
+\hline
+15 & Key management & \insecure \\
+\hline
+\end{tabular}
+\caption{Security Requirements Compliance Summary}
+\end{table}
+
+\newpage
+
+% ============================================================
+\section{Password Hashing Algorithm \& Configuration}
+% ============================================================
+
+\subsection{Requirement Importance}
+Password hashing is the foundation of authentication security. Without hashing, a data breach will cause a disaster. Encryption is not secure against insiders. Hashing mitigates from insiders, but weak hashing or improperly configured algorithm allows attackers to crack passwords via rainbow tables, brute-force, or GPU attacks. Modern standards require memory-hard algorithms like Argon2id.
+
+\subsection{Locations in Code}
+
+\textbf{File:} \texttt{auth\_lib/core/security.py} (lines 10--27):
+\begin{lstlisting}
+# Argon2id setup
+ph = PasswordHasher(
+    memory_cost=settings.ARGON2_MEMORY_COST,
+    time_cost=settings.ARGON2_TIME_COST,
+    parallelism=settings.ARGON2_PARALLELISM,
+    type=Type.ID
+)
+
+def hash_password(password: str) -> str:
+    """Hashes a password using Argon2id."""
+    return ph.hash(password)
+
+def verify_password(hashed_password: str, password: str) -> bool:
+    """Verifies a password against an Argon2id hash."""
+    try:
+        return ph.verify(hashed_password, password)
+    except VerifyMismatchError:
+        return False
+\end{lstlisting}
+
+\textbf{File:} \texttt{auth\_lib/core/config.py} (lines 14--17):
+\begin{lstlisting}
+# Argon2id Settings
+ARGON2_MEMORY_COST: int = 64 * 1024  # 64 MB in KB
+ARGON2_TIME_COST: int = 3
+ARGON2_PARALLELISM: int = 2
+\end{lstlisting}
+
+\subsection{Security Analysis}
+
+\textbf{Strengths:}
+Uses \texttt{Argon2id} algorithm---the \texttt{id} variant of the Argon2 algorithm provides resistance against side-channel attacks and GPU attacks. The Argon2 Python library securely handles salts automatically and transparently (preventing rainbow-table attacks). Configured parameters exceed OWASP minimum recommendations (19MB, 2 iterations).
+
+\textbf{Weaknesses:}
+
+\textbf{Incomplete Exception Handling:} The \texttt{argon2} library can raise:
+\begin{itemize}[noitemsep]
+    \item \texttt{VerifyMismatchError}
+    \item \texttt{InvalidHash}
+\end{itemize}
+
+Only \texttt{VerifyMismatchError} is handled. If \texttt{InvalidHash} raises, this would cause an unhandled exception and potentially leak error details.
+
+\begin{quote}
+\underline{Attack Scenario:} Attacker corrupts a stored password hash of a specific victim (via SQL injection or insider access) and modifies it to invalid format, causing \texttt{ph.verify()} to throw \texttt{InvalidHash} for any normal login attempt.
+
+\underline{Impact:} Crash the service, expose stack traces, DoS.
+
+\underline{Fix:} Handle both exceptions.
+\end{quote}
+
+\textbf{No Rehash Support:} If Argon2 parameters are later updated to stay ahead of hardware advances, existing old hashes won't be updated automatically and therefore remain weak.
+
+\begin{quote}
+\underline{Attack Scenario:} Argon2 parameters updated and old user hashes remain weak. Attacker steals database and cracks old hashes using SOTA hardware.
+
+\underline{Impact:} Legacy passwords exposed.
+
+\underline{Fix:} Rehash passwords whenever Argon2 parameters are updated. This can be done whenever a user logs in (since that is the only time we have the cleartext password). The Argon2 Python library provides a method called \texttt{check\_needs\_rehash} specifically for this purpose.
+\end{quote}
+
+\subsection{Classification}
+\partiallysecure
+
+\newpage
+% ============================================================
+\section{Password Policy Enforcement (Length/Complexity)}
+% ============================================================
+
+\subsection{Requirement Importance}
+Weak passwords are vulnerable to password spraying and credential stuffing. Therefore, it's crucial for high-risk apps to enforce password policy. However, password policy raises a trade-off between security and usability. Additionally, enforcement of complex passwords may raise security concerns because it encourages users to choose predictable patterns in passwords (e.g., adding `!' to the end of the password to satisfy the policy). On the other hand, the absence of policy allows for weak passwords.
+
+\subsection{Location in Code}
+
+\textbf{File:} \texttt{auth\_lib/schemas/schemas.py} (lines 4--6):
+\begin{lstlisting}
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str = Field(..., min_length=14, max_length=128)
+\end{lstlisting}
+
+\textbf{File:} \texttt{auth\_lib/services/auth\_service.py} (lines 17--23, 129--133):
+\begin{lstlisting}
+def register_user(self, email: str, password: str) -> User:
+    # 1. Complexity check
+    if len(password) < 14 or len(password) > 128:
+        raise ValueError("Password must be between 14 and 128 characters.")
+    
+    # 2. HIBP check
+    if ExternalSecurityService.is_password_pwned(password):
+        raise ValueError("This password has been found in a data breach.")
+    # ...
+\end{lstlisting}
+
+\textbf{File:} \texttt{external\_api\_service.py} (lines 9--30):
+\begin{lstlisting}
+def is_password_pwned(password: str) -> bool:
+    """Checks if a password has been leaked using HIBP k-anonymity API."""
+    sha1_hash = hashlib.sha1(password.encode()).hexdigest().upper()
+    prefix = sha1_hash[:5]
+    suffix = sha1_hash[5:]
+    
+    try:
+        url = f"https://api.pwnedpasswords.com/range/{prefix}"
+        response = requests.get(url, timeout=5)
+        response.raise_for_status()
+        
+        hashes = (line.split(':') for line in response.text.splitlines())
+        for h, count in hashes:
+            if h == suffix:
+                return int(count) > 0
+        return False
+    except Exception as e:
+        logger.error(f"HIBP API error: {e}")
+        return False  # Fail-safe
+\end{lstlisting}
+
+\subsection{Security Analysis}
+
+\textbf{Strengths:}
+\begin{itemize}[noitemsep]
+    \item 14-character minimum exceeds best practice recommendations (8 chars)
+    \item 128-character maximum prevents DoS via long password hashing
+    \item HIBP (Have I Been Pwned) integration protects against breached passwords
+    \item K-anonymity ensures the actual password is never sent to HIBP
+    \item No complexity requirements (uppercase, numbers, symbols)---eliminating predictable patterns in passwords
+\end{itemize}
+
+\textbf{Weaknesses:}
+
+\textbf{Missing Failure Handling:} When the HIBP API fails, the implementation returns \texttt{False} (fail-open), allowing potentially breached passwords. The README documents this as a UX trade-off.
+
+\begin{quote}
+\underline{Attack Scenario:} Assuming the attacker has access to the hashed passwords in the database (SQL injection, insider, etc.):
+\begin{enumerate}[noitemsep]
+    \item Attacker performs a targeted DDoS on the HIBP API endpoint, or exploits network instability between the server and HIBP
+    \item During this window, new clients may register accounts with breached passwords
+    \item Attacker performs dictionary attack hoping to crack weak passwords registered during the DDoS attack
+\end{enumerate}
+
+\textit{However, performing such an attack seems impractical.}
+
+\underline{Impact:} Accounts created with breached passwords are vulnerable to credential stuffing and password spraying attacks.
+
+\underline{Fix:} Implement failure handling---reject registration if HIBP is unreachable. Alternatively, allow registration but force password change on first login after HIBP becomes available.
+\end{quote}
+
+\subsection{Classification}
+\secure
+
+\newpage
+% ============================================================
+\section{Brute-Force / Rate Limiting Protection}
+% ============================================================
+
+\subsection{Requirement Importance}
+Without rate limiting, attackers can attempt millions of password combinations, or send too many requests to cause DoS. Rate limiting prevents credential stuffing, password spraying, brute-force attacks, and DoS attacks against authentication endpoints.
+
+\subsection{Location in Code}
+
+\textbf{File:} \texttt{auth\_lib/services/rate\_limit\_service.py} (lines 1--201):
+\begin{lstlisting}
+class RateLimitService:
+    def __init__(self, db: DBSession):
+        self.db = db
+
+    def is_rate_limited(self, key: str, capacity: int, refill_rate: float) -> bool:
+        """Token Bucket Rate Limiter (SQLite-backed)."""
+        bucket_key = f"rl:bucket:{key}"
+        now = datetime.now(timezone.utc)
+        
+        bucket = self.db.query(RateLimitBucket).filter(
+            RateLimitBucket.bucket_key == bucket_key
+        ).first()
+        
+        if not bucket:
+            bucket = RateLimitBucket(bucket_key=bucket_key, tokens=capacity - 1, last_refill=now)
+            self.db.add(bucket)
+            self.db.commit()
+            return False
+        
+        # Calculate token refill
+        elapsed = (now - bucket.last_refill.replace(tzinfo=timezone.utc)).total_seconds()
+        new_tokens = min(capacity, bucket.tokens + int(elapsed * refill_rate))
+        
+        if new_tokens >= 1:
+            bucket.tokens = new_tokens - 1
+            bucket.last_refill = now
+            self.db.commit()
+            return False
+        return True
+
+    def increment_failed_login(self, identifier: str) -> int:
+        """Increments failed login counter. Counters older than 24h are reset."""
+        # ... implementation ...
+
+    def is_account_locked(self, identifier: str) -> bool:
+        """Checks if account/IP is locked. Cleans up expired lockouts."""
+        # ... implementation ...
+
+    def set_lockout(self, identifier: str, duration_minutes: int):
+        """Sets a temporary lockout."""
+        # ... implementation ...
+\end{lstlisting}
+
+\textbf{File:} \texttt{auth\_lib/api/main.py} (lines 43--60):
+\begin{lstlisting}
+# 1. Rate Limiting check
+ip = request.client.host
+if rate_limit.is_account_locked(login_data.email) or rate_limit.is_account_locked(ip):
+    raise HTTPException(status_code=429, detail="Account or IP locked.")
+
+# ... authentication ...
+
+if count >= settings.MAX_FAILED_LOGIN_ATTEMPTS:
+    lockout_idx = min(count - settings.MAX_FAILED_LOGIN_ATTEMPTS, 
+                      len(settings.LOCKOUT_DURATION_MINUTES) - 1)
+    duration = settings.LOCKOUT_DURATION_MINUTES[lockout_idx]
+    rate_limit.set_lockout(login_data.email, duration)
+    rate_limit.set_lockout(ip, duration)
+\end{lstlisting}
+
+\textbf{Configuration} (\texttt{config.py}):
+\begin{lstlisting}
+MAX_FAILED_LOGIN_ATTEMPTS: int = 5
+LOCKOUT_DURATION_MINUTES: List[int] = [5, 15, 30, 60, 1440]  # Progressive
+\end{lstlisting}
+
+\subsection{Security Analysis}
+
+\textbf{Strengths:}
+\begin{itemize}[noitemsep]
+    \item Both IP AND account are rate-limited, mitigating both distributed attacks (across multiple accounts) and targeted attacks (against single accounts)
+    \item Progressive lockouts prevent sustained attacks (5m $\rightarrow$ 24h)
+    \item Token bucket algorithm implemented, allowing legitimate users who mistype their password while blocking automated attacks
+    \item 24-hour automatic expiry on failed attempt counters prevents permanent account lockout DoS attacks (maintains availability)
+\end{itemize}
+
+\textbf{Weaknesses:}
+
+\textbf{IP Reputation and Geographic Anomaly:} \texttt{get\_ip\_reputation()} and \texttt{check\_geographic\_anomaly()} are implemented in \texttt{external\_api\_service.py} (lines 33--63) but never called anywhere in the authentication flow! The absence of checking geographic anomaly may prevent identifying credential stuffing. While the absence of checking IP reputation will make it easier for an attacker to complete their attack.
+
+\subsection{Classification}
+\secure
+
+\newpage
+% ============================================================
+\section{Multi-Factor Authentication Implementation}
+% ============================================================
+
+\subsection{Requirement Importance}
+MFA provides defense-in-depth: even if passwords are compromised, attackers cannot access accounts without the second factor. TOTP is a widely-supported MFA method.
+
+\subsection{Location in Code}
+
+\textbf{File:} \texttt{auth\_lib/services/mfa\_service.py} (lines 1--31):
+\begin{lstlisting}
+class MFAService:
+    @staticmethod
+    def generate_new_totp_secret() -> str:
+        """Generates a new base32 TOTP secret."""
+        return pyotp.random_base32()
+
+    @staticmethod
+    def get_totp_instance(secret: str) -> pyotp.TOTP:
+        return pyotp.TOTP(
+            secret, 
+            interval=settings.TOTP_STEP,   # 30 seconds
+            digits=settings.TOTP_DIGITS    # 6 digits
+        )
+
+    def verify_totp(self, secret_encrypted: str, code: str) -> bool:
+        secret = encryption_manager.decrypt(secret_encrypted)
+        totp = self.get_totp_instance(secret)
+        return totp.verify(code, valid_window=1)  # 1 step tolerance
+
+    def encrypt_secret(self, secret: str) -> str:
+        return encryption_manager.encrypt(secret)
+\end{lstlisting}
+
+\textbf{File:} \texttt{auth\_lib/api/main.py} (lines 63--66):
+\begin{lstlisting}
+# 3. MFA Verification (Required by default)
+if not auth_service.mfa_service.verify_totp(user.mfa.totp_secret_encrypted, login_data.totp_code):
+    rate_limit.increment_failed_login(login_data.email)
+    raise HTTPException(status_code=401, detail="Invalid MFA code")
+\end{lstlisting}
+
+\subsection{Security Analysis}
+
+\textbf{Strengths:}
+\begin{itemize}[noitemsep]
+    \item MFA is mandatory for all accounts, preventing password-only attacks
+    \item TOTP secrets encrypted at rest with Fernet, protecting secrets if database is compromised
+    \item Uses \texttt{pyotp.random\_base32()} which uses OS CSPRNG, ensuring unpredictable secrets
+    \item Standard 30-second time step
+    \item MFA required for password reset, preventing email-only account takeover
+\end{itemize}
+
+\textbf{Weaknesses:}
+
+Missing features for comprehensive sensitive action protection and high-risk scenario protection:
+
+\textbf{No High-Risk Scenario Detection:} \texttt{check\_geographic\_anomaly()} is implemented but not integrated. Logins from new devices/locations don't trigger additional verification.
+
+\begin{quote}
+\underline{Attack Scenario:} Attacker with stolen credentials logs in from different country. No additional challenge is presented.
+
+\underline{Impact:} Account takeover from unusual locations goes undetected.
+
+\underline{Fix:} Integrate geographic anomaly detection and require step-up authentication for suspicious logins.
+\end{quote}
+
+\textbf{No Backup Codes:} If user loses authenticator device, account recovery is impossible without admin intervention.
+
+\textbf{No Rate Limiting on TOTP Attempts:} Failed TOTP attempts increment the general login counter, but a user who passes password check can potentially attempt many TOTP codes.
+
+\begin{quote}
+\underline{Attack Scenario:} Attacker knows password, attempts to brute-force 6-digit TOTP (1,000,000 combinations).
+
+\underline{Impact:} With 30-second window and no TOTP-specific rate limit, brute-force is theoretically possible.
+
+\underline{Fix:} Add separate TOTP attempt counter with strict lockout (e.g., 3 failed TOTP attempts = lockout).
+\end{quote}
+
+\subsection{Classification}
+\partiallysecure
+
+\newpage
+% ============================================================
+\section{Password Reset Token Generation}
+% ============================================================
+
+\subsection{Requirement Importance}
+Password reset tokens must be unpredictable and cryptographically random. Weak tokens allow attackers to predict or brute-force reset links, enabling unauthorized password changes. Additionally, the reset flow must not leak information about which accounts exist (user enumeration).
+
+\subsection{Location in Code}
+
+\textbf{File:} \texttt{auth\_lib/services/auth\_service.py} (lines 96--110):
+\begin{lstlisting}
+def initiate_password_reset(self, email: str):
+    user = self.db.query(User).filter(User.email == email).first()
+    if not user:
+        return  # Don't reveal if user exists
+
+    token = generate_secure_token(16)  # 128 bits
+    r_token = VerificationToken(
+        user_id=user.id,
+        token_hash=hash_token(token),
+        expires_at=datetime.now(timezone.utc) + timedelta(minutes=5),
+        type='password_reset'
+    )
+    self.db.add(r_token)
+    self.db.commit()
+    self.email_service.send_password_reset_email(email, token)
+\end{lstlisting}
+
+\textbf{File:} \texttt{auth\_lib/core/security.py} (lines 29--35):
+\begin{lstlisting}
+def generate_secure_token(nbytes: int = 16) -> str:
+    """Generates a CSPRNG cryptographically-secure random token."""
+    return secrets.token_urlsafe(nbytes)
+
+def hash_token(token: str) -> str:
+    """Hashes a token for secure storage."""
+    return hashlib.sha256(token.encode()).hexdigest()
+\end{lstlisting}
+
+\subsection{Security Analysis}
+
+\textbf{Strengths:}
+\begin{itemize}[noitemsep]
+    \item Uses Python's \texttt{secrets} module (OS-level CSPRNG) ensuring tokens are cryptographically random
+    \item 128-bit tokens ($2^{128}$ combinations) are infeasible to brute-force
+    \item Tokens stored as SHA256 hash, so database compromise doesn't reveal valid tokens
+\end{itemize}
+
+\textbf{Weaknesses:}
+
+\textbf{No Rate Limiting on Reset Requests:} The \texttt{/password-reset/request} endpoint has no rate limiting. An attacker can spam reset requests for any email address. Additionally, notice that in the implementation of \texttt{initiate\_password\_reset}, if the user does not exist the function does not generate a token and hash it. This may enable timing-based side-channel attack.
+
+\begin{quote}
+\underline{Attack Scenario 1:} Attacker floods victim's inbox with password reset emails (email bombing).
+
+\underline{Attack Scenario 2:} Attacker attempts to enumerate valid accounts by timing response differences.
+
+\underline{Impact:} User harassment, potential email provider rate limiting (scenario 1); Timing-based user enumeration (scenario 2).
+
+\underline{Fix:} Always complete computing \texttt{initiate\_password\_reset} even if the user email doesn't exist (reducing timing differences). Add rate limiting to the reset request endpoint for emails (preventing scenario 1) and for IPs (preventing scenario 2).
+\end{quote}
+
+\subsection{Classification}
+\partiallysecure
+
+\newpage
+% ============================================================
+\section{Password Reset Validation \& Expiration}
+% ============================================================
+
+\subsection{Requirement Importance}
+Reset tokens must expire quickly and be single-use. Long-lived or reusable tokens expand the attack window and allow token replay attacks. Additionally, the reset process should be protected against brute-force attempts on the token itself.
+
+\subsection{Location in Code}
+
+\textbf{File:} \texttt{auth\_lib/services/auth\_service.py} (lines 112--139):
+\begin{lstlisting}
+def complete_password_reset(self, token: str, new_password: str, totp_code: str):
+    token_hash = hash_token(token)
+    r_token = self.db.query(VerificationToken).filter(
+        VerificationToken.token_hash == token_hash,
+        VerificationToken.is_used == False,
+        VerificationToken.type == 'password_reset'
+    ).first()
+    
+    if not r_token or r_token.expires_at.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
+        raise ValueError("Invalid or expired reset token.")
+        
+    user = self.db.query(User).get(r_token.user_id)
+    
+    # Require MFA for password reset
+    if not self.mfa_service.verify_totp(user.mfa.totp_secret_encrypted, totp_code):
+        raise ValueError("Invalid MFA code.")
+
+    if len(new_password) < 14:
+        raise ValueError("Password too short.")
+        
+    if ExternalSecurityService.is_password_pwned(new_password):
+        raise ValueError("Password is pwned.")
+        
+    user.hashed_password = hash_password(new_password)
+    user.last_password_change = datetime.now(timezone.utc)
+    r_token.is_used = True  # Mark as used
+    self.db.commit()
+    return user
+\end{lstlisting}
+
+\subsection{Security Analysis}
+
+\textbf{Strengths:}
+\begin{itemize}[noitemsep]
+    \item 5-minute expiration provides a short attack window
+    \item Single-use enforcement via \texttt{is\_used} flag prevents token replay
+    \item MFA required for password reset provides defense-in-depth (email compromise alone is insufficient)
+    \item New password validated against HIBP
+    \item All sessions invalidated after successful reset, ejecting any attacker with active sessions
+    \item \texttt{last\_password\_change} timestamp updated for audit purposes
+\end{itemize}
+
+\textbf{Weaknesses:}
+
+\textbf{Token Not Invalidated After Failed MFA Attempts:} If an attacker has the reset token but not MFA, they can attempt TOTP codes indefinitely within the 5-minute window without the token being invalidated.
+
+\begin{quote}
+\underline{Attack Scenario:} Attacker intercepts reset email (e.g., compromised email server logs). They have the token but not MFA. They can attempt $\sim$1,000,000 TOTP combinations. At 100 requests/second, they could attempt 30,000 codes in 5 minutes (3\% of total space per window).
+
+\underline{Impact:} Statistically unlikely to succeed for a single token, but repeated attempts across multiple reset tokens could eventually succeed.
+
+\underline{Fix:} Add attempt counter to reset tokens. Invalidate token after 3--5 failed MFA attempts.
+\end{quote}
+
+\textbf{No Cleanup of Expired Tokens:} Expired and used tokens remain in the database indefinitely. Over time, this causes database inflation.
+
+\subsection{Classification}
+\secure
+
+\newpage
+% ============================================================
+\section{Session/Token Generation Method}
+% ============================================================
+
+\subsection{Requirement Importance}
+Session IDs must be cryptographically random (therefore unpredictable). Predictable session IDs enable session hijacking attacks. The session must also be bound to contextual information (device, IP) to detect theft.
+
+\subsection{Location in Code}
+
+\textbf{File:} \texttt{auth\_lib/core/security.py} (lines 58--65):
+\begin{lstlisting}
+def generate_session_id() -> str:
+    """Generates a 128-bit session ID, Base64 URL-encoded."""
+    return secrets.token_urlsafe(16)  # 16 bytes = 128 bits
+
+def generate_device_fingerprint(user_agent: str, ip_subnet: str, lang: str) -> str:
+    """Creates a hash of device characteristics for session binding."""
+    data = f"{user_agent}|{ip_subnet}|{lang}"
+    return hashlib.sha256(data.encode()).hexdigest()[:32]
+\end{lstlisting}
+
+\textbf{File:} \texttt{auth\_lib/services/session\_service.py} (lines 14--31):
+\begin{lstlisting}
+def create_session(self, user_id: int, device_fingerprint: str = None) -> Tuple[str, Session]:
+    """Creates a new session for a user."""
+    session_id = generate_session_id()
+    session_id_hash = hash_token(session_id)
+    
+    expires_at = datetime.now(timezone.utc) + timedelta(minutes=settings.SESSION_ABSOLUTE_TIMEOUT)
+    
+    db_session = Session(
+        user_id=user_id,
+        session_id_hash=session_id_hash,
+        expires_at=expires_at,
+        device_fingerprint=device_fingerprint
+    )
+    self.db.add(db_session)
+    self.db.commit()
+    return session_id, db_session
+\end{lstlisting}
+
+\subsection{Security Analysis}
+
+\textbf{Strengths:}
+\begin{itemize}[noitemsep]
+    \item Uses \texttt{secrets.token\_urlsafe()} ensuring session IDs are cryptographically random
+    \item 128-bit session IDs exceed OWASP minimum (64 bits), making brute-force infeasible
+    \item Session IDs stored as SHA256 hash, so database compromise doesn't reveal valid session tokens
+    \item Device fingerprint binding adds contextual security, enabling detection of session theft from different device/network
+\end{itemize}
+
+\textbf{Weaknesses:}
+
+\textbf{Fingerprint Uses IP Subnet, Not Full IP:} The fingerprint uses only a prefix of the IP (\texttt{ip\_subnet = ".".join(ip\_parts[:3])}). This allows session use across the same /24 subnet.
+
+\begin{quote}
+\underline{Attack Scenario:} Attacker on the same network (e.g., corporate LAN, public WiFi) steals session cookie. Since they share the same /24 subnet, the fingerprint matches.
+
+\underline{Impact:} Less effective device binding.
+
+\underline{Fix:} Use full IP address in fingerprint.
+\end{quote}
+
+\subsection{Classification}
+\partiallysecure
+
+\newpage
+% ============================================================
+\section{Token Entropy \& Randomness Quality}
+% ============================================================
+
+\subsection{Requirement Importance}
+Insufficient entropy makes tokens predictable. Attackers can enumerate weak tokens through brute-force, or exploit patterns in pseudo-random generators. All security-critical tokens (session IDs, reset tokens, verification tokens, etc.) must use cryptographically secure random number generators (CSPRNG).
+
+\subsection{Location in Code}
+
+\textbf{File:} \texttt{auth\_lib/core/security.py} (lines 29--35, 58--61):
+\begin{lstlisting}
+import secrets
+
+def generate_secure_token(nbytes: int = 16) -> str:
+    """Generates a CSPRNG cryptographically-secure random token."""
+    return secrets.token_urlsafe(nbytes)
+
+def generate_session_id() -> str:
+    """Generates a 128-bit session ID, Base64 URL-encoded."""
+    return secrets.token_urlsafe(16)
+\end{lstlisting}
+
+\textbf{File:} \texttt{auth\_lib/services/mfa\_service.py} (lines 7--9):
+\begin{lstlisting}
+@staticmethod
+def generate_new_totp_secret() -> str:
+    """Generates a new base32 TOTP secret."""
+    return pyotp.random_base32()  # Uses secrets.SystemRandom internally
+\end{lstlisting}
+
+\subsection{Security Analysis}
+
+\textbf{Strengths:}
+\begin{itemize}[noitemsep]
+    \item All tokens use Python's \texttt{secrets} module, which sources from OS-level CSPRNG designed to be cryptographically secure and resistant to prediction
+    \item 128-bit entropy for all tokens provides infeasibility against brute-force
+    \item URL-safe encoding makes it transport-safe
+    \item TOTP secrets use \texttt{pyotp.random\_base32()} which internally uses \texttt{secrets.SystemRandom}, ensuring MFA secrets are also unpredictable
+\end{itemize}
+
+\textbf{Weaknesses:}
+
+None identified.
+
+\subsection{Classification}
+\secure
+
+\newpage
+% ============================================================
+\section{Token Expiration Mechanism}
+% ============================================================
+
+\subsection{Requirement Importance}
+Tokens without expiration remain valid indefinitely, increasing the window for theft and replay attacks. Proper expiration with both absolute and idle timeouts limits attacker opportunities even if a session token is stolen.
+
+\subsection{Location in Code}
+
+\textbf{File:} \texttt{auth\_lib/core/config.py} (lines 19--23):
+\begin{lstlisting}
+# Session Settings
+SESSION_ABSOLUTE_TIMEOUT: int = 120   # 2 hours in minutes
+SESSION_IDLE_TIMEOUT: int = 10        # 10 minutes
+SESSION_ROTATION_INTERVAL: int = 150  # 2.5 minutes in seconds
+\end{lstlisting}
+
+\textbf{File:} \texttt{auth\_lib/services/session\_service.py} (lines 33--64):
+\begin{lstlisting}
+def validate_session(self, session_id: str, device_fingerprint: str = None) -> Optional[User]:
+    session_id_hash = hash_token(session_id)
+    db_session = self.db.query(Session).filter(Session.session_id_hash == session_id_hash).first()
+    
+    if not db_session:
+        return None
+        
+    now = datetime.now(timezone.utc)
+    
+    # Absolute timeout check (2 hours)
+    if db_session.expires_at.replace(tzinfo=timezone.utc) < now:
+        self.delete_session(session_id)
+        return None
+        
+    # Idle timeout check (10 minutes)
+    idle_limit = db_session.last_activity.replace(tzinfo=timezone.utc) + \
+        timedelta(minutes=settings.SESSION_IDLE_TIMEOUT)
+    if idle_limit < now:
+        self.delete_session(session_id)
+        return None
+
+    # Device fingerprint check
+    if db_session.device_fingerprint and db_session.device_fingerprint != device_fingerprint:
+        self.delete_session(session_id)
+        return None
+
+    # Update last activity
+    db_session.last_activity = now
+    self.db.commit()
+    return db_session.user
+\end{lstlisting}
+
+\subsection{Security Analysis}
+
+\textbf{Strengths:}
+\begin{itemize}[noitemsep]
+    \item Dual timeout mechanism provides layered protection: absolute timeout (2 hours) ensures sessions cannot persist indefinitely even if actively used, while idle timeout (10 minutes) quickly invalidates abandoned sessions
+    \item Session rotation every 2.5 minutes reduces the hijacking window---even if a session ID is stolen, it becomes invalid shortly after
+    \item Expired sessions are actively deleted on access, not just ignored
+    \item \texttt{last\_activity} timestamp updated on each valid request for accurate idle tracking
+\end{itemize}
+
+\textbf{Weaknesses:}
+
+\textbf{No Background Cleanup of Expired Sessions:} Sessions are only deleted when accessed. If a user abandons a session (closes browser, never returns), the session record persists in the database until the expiry time passes AND someone attempts to use it.
+
+\underline{Fix:} Add cleanup job (scheduled task) to delete sessions where \texttt{expires\_at < now()}.
+
+\subsection{Classification}
+\secure
+
+\newpage
+% ============================================================
+\section{Session Invalidation on Logout}
+% ============================================================
+
+\subsection{Requirement Importance}
+Logout must completely destroy session state on both client and server. If sessions persist after logout, attackers with stolen session tokens can continue accessing accounts. The logout process must be immediate and complete.
+
+\subsection{Location in Code}
+
+\textbf{File:} \texttt{auth\_lib/api/main.py} (lines 88--99):
+\begin{lstlisting}
+@app.post("/logout")
+def logout(
+    response: Response,
+    request: Request,
+    session_service: SessionService = Depends(deps.get_session_service)
+):
+    session_id = request.cookies.get("id")
+    if session_id:
+        session_service.delete_session(session_id)
+        
+    response.delete_cookie("id")
+    return {"message": "Logged out"}
+\end{lstlisting}
+
+\textbf{File:} \texttt{auth\_lib/services/session\_service.py} (lines 80--84):
+\begin{lstlisting}
+def delete_session(self, session_id: str):
+    """Invalidates a single session."""
+    session_id_hash = hash_token(session_id)
+    self.db.query(Session).filter(Session.session_id_hash == session_id_hash).delete()
+    self.db.commit()
+\end{lstlisting}
+
+\subsection{Security Analysis}
+
+\textbf{Strengths:}
+\begin{itemize}[noitemsep]
+    \item Session record is physically deleted from database (not just marked invalid), ensuring immediate and complete invalidation
+    \item Cookie explicitly deleted from client response
+    \item Subsequent requests with the old session ID will fail validation (hash not found in database)
+    \item Security middleware applies \texttt{Cache-Control: no-store} to prevent caching of authenticated responses
+\end{itemize}
+
+\textbf{Weaknesses:}
+
+\textbf{Refresh Tokens Not Explicitly Invalidated on Single-Session Logout:} The \texttt{delete\_session()} method only removes the session record. If refresh tokens were issued for this session (JWT flow), they are not invalidated.
+
+\begin{quote}
+\underline{Attack Scenario:} User logs out. Attacker who stole the refresh token can still use it to obtain new access tokens.
+
+\underline{Impact:} Logout does not fully terminate access if refresh tokens are in use.
+
+\underline{Fix:} Bind refresh tokens to sessions. Alternatively, invalidate all refresh tokens on logout. Note: \texttt{invalidate\_all\_user\_sessions()} does handle this, but single-session logout does not.
+\end{quote}
+
+\subsection{Classification}
+\secure
+
+\newpage
+% ============================================================
+\section{Session Invalidation on Password Change}
+% ============================================================
+
+\subsection{Requirement Importance}
+When a password is changed, all existing sessions must be terminated to prevent continued access by attackers who may have compromised a session. This is critical during security incidents where the user suspects credential theft.
+
+\subsection{Location in Code}
+
+\textbf{File:} \texttt{auth\_lib/services/session\_service.py} (lines 86--90):
+\begin{lstlisting}
+def invalidate_all_user_sessions(self, user_id: int):
+    """Invalidates all sessions for a user (e.g., after password reset)."""
+    self.db.query(Session).filter(Session.user_id == user_id).delete()
+    self.db.query(RefreshToken).filter(RefreshToken.user_id == user_id).delete()
+    self.db.commit()
+\end{lstlisting}
+
+\textbf{File:} \texttt{auth\_lib/api/main.py} (lines 115--119):
+\begin{lstlisting}
+@app.post("/password-reset/confirm")
+def confirm_password_reset(...):
+    user = auth_service.complete_password_reset(data.token, data.new_password, data.totp_code)
+    session_service.invalidate_all_user_sessions(user.id)
+    return {"message": "Password reset successful. All sessions invalidated."}
+\end{lstlisting}
+
+\subsection{Security Analysis}
+
+\textbf{Strengths:}
+\begin{itemize}[noitemsep]
+    \item All sessions for the user are deleted (not just current) after password reset, ensuring complete session termination
+    \item All refresh-tokens are also revoked, preventing the attacker from re-authenticating if refresh-token is stolen
+\end{itemize}
+
+\textbf{Weaknesses:}
+
+\textbf{No Authenticated Password Change Endpoint:} Only password reset (via email token) exists. There is no \texttt{/password-change} endpoint for authenticated users.
+
+\underline{Fix:} Add \texttt{POST /password-change} endpoint.
+
+\textbf{\texttt{is\_verified} Not Enforced for Password Reset:} Unverified users can still reset their password and continue using the system without email verification.
+
+\begin{quote}
+\underline{Attack Scenario:} Attacker registers with victim's email, never verifies. Attacker uses the account. Later, real owner tries to register, fails (email taken).
+
+\underline{Impact:} Email squatting (legitimate email owner cannot prove it).
+
+\underline{Fix:} Require email verification before allowing password reset.
+\end{quote}
+
+\subsection{Classification}
+\partiallysecure
+
+\newpage
+% ============================================================
+\section{Cookie / Token Storage Configuration}
+% ============================================================
+
+\subsection{Requirement Importance}
+Insecure cookie settings expose session tokens to XSS (missing \texttt{HttpOnly} header), network interception (missing \texttt{Secure} header), and CSRF (missing \texttt{SameSite} header) attacks.
+
+\subsection{Location in Code}
+
+\textbf{File:} \texttt{auth\_lib/api/main.py} (lines 77--84):
+\begin{lstlisting}
+response.set_cookie(
+    key="id",                    # Generic name
+    value=session_id,
+    httponly=True,               # No JavaScript access
+    secure=True,                 # HTTPS only
+    samesite="lax"               # CSRF protection
+)
+\end{lstlisting}
+
+\textbf{File:} \texttt{auth\_lib/middleware/security\_middleware.py} (lines 52--59):
+\begin{lstlisting}
+if new_session_id:
+    response.set_cookie(
+        key="id",
+        value=new_session_id,
+        httponly=True,
+        secure=True,
+        samesite="lax"
+    )
+\end{lstlisting}
+
+\subsection{Security Analysis}
+
+\textbf{Strengths:}
+\begin{itemize}[noitemsep]
+    \item \texttt{HttpOnly=True} prevents JavaScript access, mitigating XSS-based session theft. Even if an attacker injects malicious script, they cannot read the session cookie
+    \item \texttt{Secure=True} ensures cookie is only sent over HTTPS, preventing interception on unencrypted connections
+    \item \texttt{SameSite=Lax} protects against CSRF on POST, PUT, and DELETE requests
+    \item Generic cookie name ``id'' (doesn't reveal ``SESSIONID'' or framework-specific names) prevents fingerprinting
+\end{itemize}
+
+\textbf{Weaknesses:}
+
+None identified.
+
+\subsection{Classification}
+\secure
+
+\newpage
+% ============================================================
+\section{Protection Against Session Fixation}
+% ============================================================
+
+\subsection{Requirement Importance}
+Session fixation allows attackers to set a known session ID on a victim's browser before login. After the victim authenticates, the attacker can use the pre-set session ID to access the authenticated session. Prevention requires generating a new session ID after successful authentication.
+
+\subsection{Location in Code}
+
+\textbf{File:} \texttt{auth\_lib/api/main.py} (lines 71--76):
+\begin{lstlisting}
+# 5. Create Session (new session ID generated after authentication)
+session_id, _ = session_service.create_session(
+    user.id, 
+    device_fingerprint=request.state.device_fingerprint
+)
+
+# 6. Set Secure Cookie
+response.set_cookie(
+    key="id",
+    value=session_id,
+    httponly=True,
+    secure=True,
+    samesite="lax"
+)
+\end{lstlisting}
+
+\textbf{File:} \texttt{auth\_lib/services/session\_service.py} (lines 66--78):
+\begin{lstlisting}
+def rotate_session(self, old_session_id: str) -> Optional[str]:
+    """Rotates a session ID (every 2.5 minutes)."""
+    old_hash = hash_token(old_session_id)
+    db_session = self.db.query(Session).filter(Session.session_id_hash == old_hash).first()
+    
+    if not db_session:
+        return None
+        
+    new_session_id = generate_session_id()
+    db_session.session_id_hash = hash_token(new_session_id)
+    self.db.commit()
+    return new_session_id
+\end{lstlisting}
+
+\subsection{Security Analysis}
+
+\textbf{Strengths:}
+\begin{itemize}[noitemsep]
+    \item New session ID is always generated after successful authentication in \texttt{create\_session()}
+    \item Any pre-existing session ID (e.g., set by an attacker) is never promoted to an authenticated session
+    \item Session rotation every 2.5 minutes further limits the window for session theft---even if an attacker observes a valid session ID, it becomes invalid within minutes
+    \item Old session ID is immediately invalidated on rotation (hash is replaced)
+    \item Device fingerprint binding provides additional detection of session theft from different contexts
+\end{itemize}
+
+\textbf{Weaknesses:}
+
+None identified.
+
+\subsection{Classification}
+\secure
+
+\newpage
+% ============================================================
+\section{Privilege Separation / Role Checking}
+% ============================================================
+
+\subsection{Requirement Importance}
+Role-based access control (RBAC) ensures users can only access resources they are allowed to access. Missing role checks allow privilege escalation. For a cryptocurrency wallet, this is critical---unauthorized access could result in fund theft.
+
+\subsection{Location in Code}
+
+\textbf{File:} \texttt{auth\_lib/models/models.py} (lines 7--21):
+\begin{lstlisting}
+class User(Base):
+    __tablename__ = "users"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
+    is_verified = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    last_password_change = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    # NO ROLE FIELD EXISTS
+\end{lstlisting}
+
+\textbf{File:} \texttt{auth\_lib/api/deps.py} (lines 23--42):
+\begin{lstlisting}
+async def get_current_user(
+    request: Request,
+    db: Session = Depends(get_db),
+    session_service: SessionService = Depends(get_session_service)
+):
+    session_id = request.cookies.get("id")
+    if not session_id:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    user = session_service.validate_session(session_id)
+    if not user:
+        raise HTTPException(status_code=401, detail="Session invalid or expired")
+    
+    return user  # No role check, no is_verified check
+\end{lstlisting}
+
+\subsection{Security Analysis}
+
+\textbf{Strengths:}
+\begin{itemize}[noitemsep]
+    \item Basic authentication is enforced on protected endpoints via \texttt{get\_current\_user}
+    \item Session validation is performed before granting access
+    \item Email verification flag exists (\texttt{is\_verified}) for future enforcement
+\end{itemize}
+
+\textbf{Weaknesses:}
+
+\textbf{No Role/Permission Model Exists:} The User model has no \texttt{role} or \texttt{permissions} field at all. All authenticated users have identical privileges.
+
+\begin{quote}
+\underline{Attack Scenario:} If Admin functionality is added later (e.g., \texttt{/admin/users/delete}) without RBAC, any authenticated user can access it.
+
+\underline{Impact:} Privilege escalation.
+
+\underline{Fix:} Add role field to user data.
+\end{quote}
+
+\textbf{\texttt{is\_verified} Flag Not Enforced:} Users can register, skip email verification, and fully use the system. The \texttt{is\_verified} field exists but is never checked.
+
+\begin{quote}
+\underline{Attack Scenario:} Attacker registers with victim's email (e.g., alice@example.com). Attacker never verifies but gains full account access. Real Alice tries to register later and finds the email is taken.
+
+\underline{Impact:} Email squatting (legitimate email owner cannot prove it).
+
+\underline{Fix:} Check \texttt{is\_verified} in \texttt{get\_current\_user}.
+\end{quote}
+
+\textbf{No Resource-Level Access Control:} No mechanism to ensure users can only access their own resources.
+
+\begin{quote}
+\underline{Attack Scenario:} If \texttt{/wallet/\{wallet\_id\}} endpoint is added without ownership check, User A could access User B's wallet by guessing IDs.
+
+\underline{Impact:} Privilege escalation.
+
+\underline{Fix:} Implement mechanism to ensure user ownership checks.
+\end{quote}
+
+\subsection{Classification}
+\missing
+
+\newpage
+% ============================================================
+\section{Cryptographic Key Management}
+% ============================================================
+
+\subsection{Requirement Importance}
+Cryptographic keys protect sensitive data. All encrypted data could be compromised if keys are not properly managed. For a cryptocurrency wallet, this is catastrophic.
+
+\subsection{Location in Code}
+
+\textbf{File:} \texttt{auth\_lib/core/config.py} (lines 9--12):
+\begin{lstlisting}
+# Security Keys (Should be set in environment)
+# Using default values only for development; production MUST set these
+SECRET_KEY: str = "y3f8v2n9m4c7x1z0l9k8j7h6g5f4d3s2"
+ENCRYPTION_KEY_LATEST: str = "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=" 
+\end{lstlisting}
+
+\textbf{File:} \texttt{auth\_lib/core/security.py} (lines 37--56):
+\begin{lstlisting}
+class EncryptionManager:
+    """Handles encryption and decryption with key rotation support."""
+    def __init__(self, keys: list[str]):
+        # keys[0] is the primary (newest) key
+        self.fernets = [Fernet(k.encode() if isinstance(k, str) else k) for k in keys]
+        self.multi_fernet = MultiFernet(self.fernets)
+
+    def encrypt(self, data: str) -> str:
+        return self.multi_fernet.encrypt(data.encode()).decode()
+
+    def decrypt(self, encrypted_data: str) -> str:
+        return self.multi_fernet.decrypt(encrypted_data.encode()).decode()
+
+# Global encryption manager initialized at module load
+encryption_manager = EncryptionManager([settings.ENCRYPTION_KEY_LATEST])
+\end{lstlisting}
+
+\subsection{Security Analysis}
+
+\textbf{Strengths:}
+\begin{itemize}[noitemsep]
+    \item Uses Fernet encryption (AES-128-CBC + HMAC-SHA256), providing both confidentiality and integrity
+    \item MultiFernet architecture supports key rotation without breaking existing encrypted data
+    \item Keys are loaded via pydantic-settings which supports environment variable overrides
+    \item Comments explicitly warn against using defaults in production
+\end{itemize}
+
+\textbf{Weaknesses:}
+
+\textbf{Default Keys Hardcoded in Source Code:} The default \texttt{SECRET\_KEY} and \texttt{ENCRYPTION\_KEY\_LATEST} are committed to the repository. Any insider with access to the source can decrypt all data encrypted with defaults.
+
+\begin{quote}
+\underline{Attack Scenario:} Insider attacker who has the source code can:
+\begin{enumerate}[noitemsep]
+    \item Decrypt all TOTP secrets from database
+    \item Generate valid TOTP codes for any user
+    \item Bypass MFA
+\end{enumerate}
+
+\underline{Impact:} Complete authentication bypass.
+
+\underline{Fix:} Set default keys via environment variables.
+\end{quote}
+
+\textbf{Default Encryption Key Is Predictable:} The default \texttt{ENCRYPTION\_KEY\_LATEST} decodes from Base64 to \texttt{"12345678901234567890123456789012"}---an obviously weak test key.
+
+\begin{quote}
+\underline{Attack Scenario:} An attacker might guess common test keys even without source code access.
+
+\underline{Impact:} Complete authentication bypass.
+
+\underline{Fix:} Use properly generated default keys.
+\end{quote}
+
+\subsection{Classification}
+\insecure
+
+\end{document}
