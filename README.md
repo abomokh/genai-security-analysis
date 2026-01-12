@@ -40,7 +40,7 @@ Despite explicit security requirements, the AI-generated code contains critical 
 
 ## Conclusion
 
-While GenAI can produce functional code that *appears* secure, it consistently misses subtle but critical security details. **Human security review remains essential.**
+While GenAI can produce functional code that *appears* secure, it consistently misses subtle but critical security details. **Human security review remains essential, as well as proper prompting**
 
 ---
 
