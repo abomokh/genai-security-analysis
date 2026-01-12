@@ -15,7 +15,9 @@ venv/
 .vscode/
 *.swp
 
-# LaTeX auxiliary files
+# LaTeX source files (keep PDF only)
+SECURITY_ANALYSIS.md
+SECURITY_ANALYSIS.tex
 *.aux
 *.log
 *.out

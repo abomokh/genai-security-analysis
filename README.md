@@ -2,18 +2,29 @@
 
 **Testing the Boundaries of Generative AI in Producing Secure Authentication Code**
 
+> ## ***This was NOT written by AI, so take your time reading it :)***
+
 ## Overview
 
 This project demonstrates that **GenAI should never be blindly trusted to produce secure code**. We prompted an AI model (Gemini 3 Flash Agent) to generate a production-ready authentication library for a cryptocurrency wallet application, then performed a comprehensive security analysis of the output.
 
+**Note that the security analysis was not written by GenAI, but used GenAI to ensure completeness (and fix grammar issues of course)**
+
 ## Project Structure
 
 ```
-├── auth_lib/           # AI-generated authentication library
-├── SECURITY_ANALYSIS.md    # Detailed security analysis (Markdown)
-├── SECURITY_ANALYSIS.tex   # Detailed security analysis (LaTeX)
+├── auth_lib/                                 # AI-generated authentication library
+├── prompt.md                                 # The prompt we gave to the AI
+├── AI_Response.md                            # The AI's response and reasoning
+├── Security Analysis of Generated Code.pdf  # Our detailed security analysis
 └── requirements.txt
 ```
+
+## Methodology
+
+1. **Prompt Engineering**: We crafted a detailed prompt (`prompt.md`) specifying strict security requirements for a cryptocurrency wallet authentication system
+2. **AI Generation**: Gemini 3 Flash Agent generated the complete `auth_lib/` implementation (`AI_Response.md`)
+3. **Security Audit**: We manually analyzed the generated code against the requirements and security best practices
 
 ## Key Findings
 
@@ -33,5 +44,5 @@ While GenAI can produce functional code that *appears* secure, it consistently m
 
 ---
 
-*Securing Digital Products and Services — Homework 1*  
-*Aya Darawshi (323964676) & Ibrahim Abomokh (315270678)*
+*Securing Digital Products and Services*  
+*Aya Darawshi & Ibrahim Abomokh*
